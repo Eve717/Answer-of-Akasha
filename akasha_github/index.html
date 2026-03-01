@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AKASHA — Oracle Data Visualization</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cinzel+Decorative:wght@400;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="cosmos-canvas"></canvas>
+<div id="app">
+  <header>
+    <div class="sigil">
+      <svg viewBox="0 0 100 100" fill="none">
+        <circle cx="50" cy="50" r="46" stroke="rgba(200,168,75,0.35)" stroke-width="0.7"/>
+        <circle cx="50" cy="50" r="40" stroke="rgba(200,168,75,0.12)" stroke-width="0.4"/>
+        <g stroke="rgba(200,168,75,0.55)" stroke-width="0.7">
+          <line x1="50" y1="4" x2="50" y2="96"/><line x1="4" y1="50" x2="96" y2="50"/>
+          <line x1="18" y1="18" x2="82" y2="82"/><line x1="82" y1="18" x2="18" y2="82"/>
+        </g>
+        <polygon points="50,14 84,72 16,72" stroke="rgba(77,217,232,0.45)" stroke-width="0.7" fill="none"/>
+        <polygon points="50,86 16,28 84,28" stroke="rgba(77,217,232,0.2)" stroke-width="0.5" fill="none"/>
+        <ellipse cx="50" cy="50" rx="9" ry="6.5" stroke="rgba(200,168,75,0.75)" stroke-width="0.9" fill="rgba(200,168,75,0.08)"/>
+        <circle cx="50" cy="50" r="2.8" fill="rgba(200,168,75,0.95)"/>
+        <g stroke="rgba(200,168,75,0.25)" stroke-width="0.5">
+          <line x1="50" y1="2" x2="50" y2="8"/><line x1="50" y1="92" x2="50" y2="98"/>
+          <line x1="2" y1="50" x2="8" y2="50"/><line x1="92" y1="50" x2="98" y2="50"/>
+        </g>
+      </svg>
+    </div>
+    <h1>AKASHA</h1>
+    <div class="subtitle">Oracle Data Visualization System</div>
+    <div class="header-divider"></div>
+  </header>
+
+  <main>
+    <div class="ritual-intro">
+      <p>Ask what is on your mind. Any question — about a person, a decision, a feeling.<br>Then give the oracle a word that feels right. It will find its own answer.</p>
+    </div>
+
+    <div class="input-panel" id="input-section">
+      <div class="corner tl"></div><div class="corner tr"></div>
+      <div class="corner bl"></div><div class="corner br"></div>
+      <div class="field-group">
+        <label class="field-label" for="question">I. The Question <span>/ in English — e.g. "origin of music" or "black holes"</span></label>
+        <textarea id="question" rows="3" placeholder="What drives the rise and fall of civilisations?"></textarea>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="passphrase">II. Your Ritual Word <span>/ same word + question = same fate, always</span></label>
+        <input type="text" id="passphrase" placeholder="e.g.  moonrise  ·  eternal  ·  seven">
+      </div>
+      <div class="error-msg" id="error-msg">The oracle requires both a question and a ritual word.</div>
+      <button class="invoke-btn" onclick="invokeOracle()">✦ Invoke the Oracle ✦</button>
+    </div>
+
+    <div class="loading-state" id="loading-state">
+      <div class="ritual-circle">
+        <svg viewBox="0 0 100 100" fill="none">
+          <circle cx="50" cy="50" r="42" stroke="rgba(200,168,75,0.15)" stroke-width="1"/>
+          <path d="M50 8 A42 42 0 0 1 92 50" stroke="rgba(200,168,75,0.9)" stroke-width="1.5" stroke-linecap="round"/>
+          <path d="M50 8 A42 42 0 0 0 8 50" stroke="rgba(77,217,232,0.5)" stroke-width="1" stroke-linecap="round"/>
+          <circle cx="50" cy="8" r="3.5" fill="rgba(200,168,75,0.95)"/>
+          <circle cx="92" cy="50" r="2.5" fill="rgba(77,217,232,0.8)"/>
+          <polygon points="50,36 61,62 39,62" stroke="rgba(200,168,75,0.35)" stroke-width="0.8" fill="none"/>
+          <circle cx="50" cy="50" r="5.5" stroke="rgba(200,168,75,0.55)" stroke-width="0.8" fill="rgba(200,168,75,0.08)"/>
+        </svg>
+      </div>
+      <div class="loading-text" id="loading-text">CONSULTING THE AKASHIC RECORDS...</div>
+    </div>
+
+    <div class="oracle-result" id="oracle-result">
+      <div class="view-toggle">
+        <button class="toggle-btn active" onclick="setView('oracle')" id="btn-oracle">✦ Oracle Vision</button>
+        <button class="toggle-btn" onclick="setView('data')" id="btn-data">⊡ Raw Data</button>
+      </div>
+
+      <div id="oracle-view" class="active">
+        <div class="result-grid">
+          <div class="viz-wrap"><canvas id="viz-canvas"></canvas></div>
+          <div class="right-col">
+            <div>
+              <div class="section-label">✦ Words the Oracle Found ✦</div>
+              <div class="keywords-grid" id="keywords-grid"></div>
+            </div>
+            <div>
+              <div class="section-label" style="margin-top:1.2rem">⊹ How Often Each Word Appears ⊹</div>
+              <div class="freq-bars" id="freq-bars"></div>
+            </div>
+          </div>
+          <div class="pronouncement">
+            <div class="pronouncement-text" id="pronouncement-text"></div>
+            <div class="seed-display" id="seed-display"></div>
+            <div style="margin-top:1rem;font-family:'Share Tech Mono',monospace;font-size:0.54rem;letter-spacing:0.22em;color:rgba(160,174,192,0.28);text-align:center">THE HIGHLIGHTED WORDS COME FROM WIKIPEDIA · HOVER A WORD CARD TO SEE HOW OFTEN IT APPEARED</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="data-view">
+        <div class="data-panel">
+          <div class="data-field">
+            <div class="data-field-key">// WIKIPEDIA SOURCE</div>
+            <div class="data-field-val" id="dv-source"></div>
+          </div>
+          <div class="data-field">
+            <div class="data-field-key">// SEED DERIVATION</div>
+            <div class="data-field-val" id="dv-seed"></div>
+          </div>
+          <div class="data-field">
+            <div class="data-field-key">// DATA → VISUAL MAPPING</div>
+            <div class="data-field-val"><table class="mapping-table" id="dv-mapping"></table></div>
+          </div>
+          <div class="data-field">
+            <div class="data-field-key">// WIKIPEDIA EXCERPT</div>
+            <div class="data-field-val"><p class="wiki-excerpt" id="dv-excerpt"></p></div>
+          </div>
+          <div class="data-field">
+            <div class="data-field-key">// CRITICAL REFLECTION</div>
+            <div class="data-field-val" style="color:rgba(232,121,168,0.75);font-size:0.88rem;font-style:italic;line-height:1.85;" id="dv-critical"></div>
+          </div>
+        </div>
+      </div>
+
+      <button class="reset-btn" onclick="resetOracle()">↺ Ask Another Question</button>
+    </div>
+  </main>
+  <footer>AKASHA · Wikipedia Data Visualization · Goldsmiths · All text from Wikipedia (Public Domain) · No personal data collected</footer>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>
